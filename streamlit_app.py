@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from plots import lifeexp_gdp_scatter
+import pickle
 
 st.header("Worldwide Analysis of Quality of Life and Economic Factors")
 st.write("This app enables you to explore the relationships between poverty, life expectancy, and GDP across various countries and years.\n\nUse the panels to select options and interact with the data.")
@@ -43,6 +44,69 @@ with tab_GO:
     # plot
     fig = lifeexp_gdp_scatter(filtered_data_1)
     st.plotly_chart(fig, use_container_width=True)
+
+    # === Prediction panel ===
+    st.subheader("Life Expectancy Prediction")
+
+    # load trained model
+    with open("life_expectancy_model.pkl", "rb") as f:
+        model = pickle.load(f)
+
+    st.write("Enter values to estimate life expectancy using the trained Random Forest model.")
+
+    # define ranges from dataset
+    gdp_min = float(data["GDP per capita"].min())
+    gdp_max = float(data["GDP per capita"].max())
+    gdp_default = float(data["GDP per capita"].median())
+
+    pov_min = float(data["headcount_ratio_upper_mid_income_povline"].min())
+    pov_max = float(data["headcount_ratio_upper_mid_income_povline"].max())
+    pov_default = float(data["headcount_ratio_upper_mid_income_povline"].median())
+
+    year_min = int(data["year"].min())
+    year_max = int(data["year"].max())
+    year_default = int(data["year"].median())
+
+    # input widgets
+    input_gdp = st.number_input(
+        "GDP per capita",
+        min_value=gdp_min,
+        max_value=gdp_max,
+        value=gdp_default,
+        step=100.0,
+    )
+
+    input_poverty = st.number_input(
+        "Headcount ratio (upper middle income poverty line)",
+        min_value=pov_min,
+        max_value=pov_max,
+        value=pov_default,
+        step=0.1,
+    )
+
+    input_year = st.slider(
+        "Year",
+        min_value=year_min,
+        max_value=year_max,
+        value=year_default,
+        key="prediction_year_slider",
+    )
+
+    # prediction
+    if st.button("Predict Life Expectancy"):
+
+        input_df = pd.DataFrame({
+            "GDP per capita": [input_gdp],
+            "headcount_ratio_upper_mid_income_povline": [input_poverty],
+            "year": [input_year],
+        })
+
+        prediction = model.predict(input_df)[0]
+
+        st.metric(
+            "Predicted Life Expectancy (IHME)",
+            f"{prediction:.2f} years"
+        )
 
 with tab_DE:
 
