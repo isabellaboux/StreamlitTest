@@ -101,12 +101,21 @@ with tab_GO:
             "year": [input_year],
         })
 
+    
         prediction = model.predict(input_df)[0]
 
         st.metric(
             "Predicted Life Expectancy (IHME)",
             f"{prediction:.2f} years"
         )
+
+    # show relative feature importance
+    importance_df = pd.DataFrame({
+        "Feature": ["GDP per capita", "headcount_ratio_upper_mid_income_povline", "year"],
+        "Importance": model.feature_importances_,
+    })
+
+    st.bar_chart(importance_df.set_index("Feature"))
 
 with tab_DE:
 
