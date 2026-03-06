@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from plots import lifeexp_gdp_scatter
 
 st.header("Worldwide Analysis of Quality of Life and Economic Factors")
 st.write("This app enables you to explore the relationships between poverty, life expectancy, and GDP across various countries and years.\n\nUse the panels to select options and interact with the data.")
@@ -39,16 +40,9 @@ with tab_GO:
     col3.metric("mean of headcount_ratio_upper_mid_income_povline", str(filtered_data_1["headcount_ratio_upper_mid_income_povline"].mean().round(2)))
     col4.metric("Number of countries", str(filtered_data_1["country"].nunique()))
 
-    # add plot
-    # fig = px.scatter(
-    #     filtered_data_1,
-    #     x="gdpPercap",
-    #     y="lifeExp",
-    #     color="continent",
-    #     hover_name="country"
-    # )
-
-    # st.plotly_chart(fig, use_container_width=True)
+    # plot
+    fig = lifeexp_gdp_scatter(filtered_data_1)
+    st.plotly_chart(fig, use_container_width=True)
 
 with tab_DE:
 
@@ -86,14 +80,3 @@ with tab_DE:
     st.dataframe(filtered_data)
 
 
-    
-
-fig = px.scatter(
-    filtered_data_1,
-    x="gdpPercap",
-    y="lifeExp",
-    color="continent",
-    hover_name="country"
-)
-
-st.plotly_chart(fig, use_container_width=True)
